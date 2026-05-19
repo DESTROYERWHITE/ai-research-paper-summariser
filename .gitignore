@@ -1,0 +1,10 @@
+.env
+backend/.env
+backend/app/data/*.json
+!backend/app/data/.gitkeep
+__pycache__/
+.pytest_cache/
+.venv/
+node_modules/
+dist/
+.DS_Store

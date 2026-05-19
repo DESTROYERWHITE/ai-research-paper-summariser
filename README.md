@@ -1,0 +1,93 @@
+# AI Research Paper Summariser
+
+Portfolio project for Python + AI roles. It searches arXiv, summarises papers with Claude, saves a reading list, and exports saved summaries as Markdown or `.docx`.
+
+## Tech Stack
+- Backend: FastAPI, async `httpx`, Pydantic, python-dotenv, python-docx
+- AI: Claude API with strict structured JSON output
+- Data source: arXiv REST API and XML parsing
+- Frontend: React + Vite, responsive async UX
+- Storage: local JSON cache/library files for a simple deployable prototype
+
+## Features
+- Search arXiv by keyword or paper ID.
+- Parse title, authors, abstract, published date, categories, and URL.
+- Cache arXiv and summary responses locally to reduce repeat API calls.
+- Summarise each paper into:
+  - 3 summary bullets
+  - key contributions
+  - identified limitations
+  - suggested follow-up papers
+- Save papers into a reading list.
+- Export saved summaries as Markdown or DOCX.
+- Use loading skeletons, error states, and generation indicators in the UI.
+
+## Local Setup
+
+### Backend
+```bash
+cd backend
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+copy .env.example .env
+uvicorn app.main:app --reload
+```
+
+Set your Claude key in `backend/.env`:
+
+```env
+ANTHROPIC_API_KEY=your_claude_api_key_here
+ANTHROPIC_MODEL=claude-3-5-sonnet-20241022
+FRONTEND_ORIGIN=http://localhost:5173
+```
+
+The app intentionally does not require a key for local exploration. Without `ANTHROPIC_API_KEY`, it returns a clearly marked fallback summary so the full workflow remains demoable.
+
+### Frontend
+```bash
+cd frontend
+npm install
+copy .env.example .env
+npm run dev
+```
+
+Open `http://localhost:5173`.
+
+## API
+- `GET /search?q=keyword_or_arxiv_id`
+- `POST /summarise` with body `{ "paper_id": "1706.03762" }`
+- `GET /library`
+- `POST /library`
+- `DELETE /library/{id}`
+- `GET /export/markdown`
+- `GET /export/docx`
+
+## Security Notes
+- API keys are loaded from `.env` via `python-dotenv`.
+- `.env` files are ignored by git.
+- `backend/.env.example` documents required variables without committing secrets.
+
+## Testing
+```bash
+cd backend
+pytest
+```
+
+The repo includes 10 preloaded research paper references in `backend/tests/fixtures_research_papers.json` for demo topics and portfolio screenshots.
+
+## Deployment Notes
+- Deploy the FastAPI backend to Render or Railway.
+- Add `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`, and `FRONTEND_ORIGIN` as backend environment variables.
+- Deploy the React frontend to Vercel.
+- Add `VITE_API_BASE_URL` pointing to the backend URL.
+- For production persistence, replace JSON files with Postgres or another managed datastore.
+
+## Extension Ideas
+- Summarise full PDFs with PyMuPDF instead of abstract-only summaries.
+- Stream Claude output with Server-Sent Events.
+- Add BibTeX/RIS citation export.
+- Add user accounts and per-user reading lists.
+
+## Sprint Plan
+See [docs/SPRINT_PLAN.md](docs/SPRINT_PLAN.md).

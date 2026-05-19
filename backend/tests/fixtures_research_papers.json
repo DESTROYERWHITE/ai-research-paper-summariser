@@ -1,0 +1,62 @@
+[
+  {
+    "id": "1706.03762",
+    "title": "Attention Is All You Need",
+    "topic": "transformers",
+    "why_preload": "Canonical architecture behind modern LLM systems."
+  },
+  {
+    "id": "1810.04805",
+    "title": "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding",
+    "topic": "language representation",
+    "why_preload": "Strong NLP baseline and interview-friendly model history."
+  },
+  {
+    "id": "2005.14165",
+    "title": "Language Models are Few-Shot Learners",
+    "topic": "large language models",
+    "why_preload": "Shows scaling and prompting as a capability shift."
+  },
+  {
+    "id": "2203.02155",
+    "title": "Training Language Models to Follow Instructions with Human Feedback",
+    "topic": "RLHF",
+    "why_preload": "Connects LLM engineering to alignment and product behavior."
+  },
+  {
+    "id": "2210.03629",
+    "title": "ReAct: Synergizing Reasoning and Acting in Language Models",
+    "topic": "agentic workflows",
+    "why_preload": "Relevant to tool-using AI applications."
+  },
+  {
+    "id": "2305.14314",
+    "title": "QLoRA: Efficient Finetuning of Quantized LLMs",
+    "topic": "efficient fine-tuning",
+    "why_preload": "Useful for practical ML systems constraints."
+  },
+  {
+    "id": "2004.05150",
+    "title": "Dense Passage Retrieval for Open-Domain Question Answering",
+    "topic": "retrieval augmented generation",
+    "why_preload": "Important precursor for RAG pipelines."
+  },
+  {
+    "id": "2005.11401",
+    "title": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
+    "topic": "RAG",
+    "why_preload": "Directly connected to research summarisation tools."
+  },
+  {
+    "id": "2302.13971",
+    "title": "LLaMA: Open and Efficient Foundation Language Models",
+    "topic": "open foundation models",
+    "why_preload": "Signals awareness of open model ecosystems."
+  },
+  {
+    "id": "2310.06825",
+    "title": "Mistral 7B",
+    "topic": "efficient foundation models",
+    "why_preload": "Compact model reference for deployment-minded discussion."
+  }
+]
