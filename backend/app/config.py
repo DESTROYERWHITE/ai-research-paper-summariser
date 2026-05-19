@@ -13,6 +13,8 @@ load_dotenv(BACKEND_DIR / ".env")
 
 class Settings(BaseSettings):
     app_name: str = "AI Research Paper Summariser"
+    gemini_api_key: str | None = None
+    gemini_model: str = "gemini-2.5-flash"
     anthropic_api_key: str | None = None
     anthropic_model: str = "claude-3-5-sonnet-20241022"
     arxiv_base_url: str = "https://export.arxiv.org/api/query"

@@ -1,6 +1,6 @@
 # AI Research Paper Summariser
 
-Portfolio project for Python + AI roles. It searches arXiv, summarises papers with Claude, saves a reading list, and exports saved summaries as Markdown or `.docx`.
+Portfolio project for Python + AI roles. It searches arXiv, summarises papers with Gemini or Claude, saves a reading list, and exports saved summaries as Markdown or `.docx`.
 
 ## One-Click Local App
 On Windows, double-click:
@@ -19,7 +19,7 @@ Close the launcher window to stop the app.
 
 ## Tech Stack
 - Backend: FastAPI, async `httpx`, Pydantic, python-dotenv, python-docx
-- AI: Claude API with strict structured JSON output
+- AI: Gemini API primary, optional Claude fallback, strict structured JSON output
 - Data source: arXiv REST API and XML parsing
 - Frontend: local FastAPI-served app for one-click use, plus React + Vite source for deployment
 - Storage: local JSON cache/library files for a simple deployable prototype
@@ -50,15 +50,17 @@ copy .env.example .env
 uvicorn app.main:app --reload
 ```
 
-Set your Claude key in `backend/.env`:
+Set your Gemini key in `backend/.env`:
 
 ```env
+GEMINI_API_KEY=your_gemini_api_key_here
+GEMINI_MODEL=gemini-2.5-flash
 ANTHROPIC_API_KEY=your_claude_api_key_here
 ANTHROPIC_MODEL=claude-3-5-sonnet-20241022
 FRONTEND_ORIGIN=http://localhost:5173
 ```
 
-The app intentionally does not require a key for local exploration. Without `ANTHROPIC_API_KEY`, it returns a clearly marked fallback summary so the full workflow remains demoable.
+The app intentionally does not require a key for local exploration. Without `GEMINI_API_KEY` or `ANTHROPIC_API_KEY`, it returns a clearly marked fallback summary so the full workflow remains demoable.
 
 ### Frontend
 ```bash
@@ -97,7 +99,7 @@ The repo includes 10 preloaded research paper references in `backend/tests/fixtu
 
 ## Deployment Notes
 - Deploy the FastAPI backend to Render or Railway.
-- Add `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`, and `FRONTEND_ORIGIN` as backend environment variables.
+- Add `GEMINI_API_KEY`, `GEMINI_MODEL`, and `FRONTEND_ORIGIN` as backend environment variables. Optionally add `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL` as a fallback provider.
 - Deploy the React frontend to Vercel.
 - Add `VITE_API_BASE_URL` pointing to the backend URL.
 - For production persistence, replace JSON files with Postgres or another managed datastore.

@@ -1,8 +1,6 @@
 import json
 
 import httpx
-from fastapi import HTTPException
-
 from app.config import get_settings
 from app.models import PaperResult, SummaryResponse
 from app.services.cache import summary_cache
@@ -16,6 +14,14 @@ limitations: an array of limitations, assumptions, or risks identified from the 
 follow_up_papers: an array of 3 relevant follow-up paper titles or search phrases.
 Do not include markdown fences or commentary."""
 
+PLACEHOLDER_KEYS = {
+    "",
+    "your_claude_api_key_here",
+    "your_anthropic_api_key_here",
+    "your_gemini_api_key_here",
+    "sk-ant-your-key",
+}
+
 
 def _fallback_summary(paper: PaperResult) -> SummaryResponse:
     return SummaryResponse(
@@ -23,7 +29,7 @@ def _fallback_summary(paper: PaperResult) -> SummaryResponse:
         summary_bullets=[
             f"{paper.title} addresses a research problem in {', '.join(paper.categories[:2]) or 'its field'}.",
             paper.abstract[:260].rstrip() + ("..." if len(paper.abstract) > 260 else ""),
-            "Use the Claude API key to generate a richer structured summary from the live model.",
+            "Add a working Gemini or Claude API key to generate a richer structured summary from a live model.",
         ],
         contributions=[
             "Extracted metadata and paper text for structured analysis.",
@@ -42,14 +48,21 @@ def _fallback_summary(paper: PaperResult) -> SummaryResponse:
 
 
 async def summarise_with_claude(paper: PaperResult) -> SummaryResponse:
-    cached = await summary_cache.get(paper.id)
+    settings = get_settings()
+    provider, cache_key = _provider_and_cache_key(settings, paper.id)
+    cached = await summary_cache.get(cache_key)
     if cached:
         return SummaryResponse.model_validate(cached)
 
-    settings = get_settings()
-    if not settings.anthropic_api_key:
+    if provider == "gemini":
+        summary = await _summarise_with_gemini(paper, settings)
+        await summary_cache.set(cache_key, summary.model_dump(mode="json"))
+        return summary
+
+    api_key = (settings.anthropic_api_key or "").strip()
+    if api_key.lower() in PLACEHOLDER_KEYS:
         summary = _fallback_summary(paper)
-        await summary_cache.set(paper.id, summary.model_dump(mode="json"))
+        await summary_cache.set(cache_key, summary.model_dump(mode="json"))
         return summary
 
     payload = {
@@ -65,27 +78,70 @@ async def summarise_with_claude(paper: PaperResult) -> SummaryResponse:
         ],
     }
     headers = {
-        "x-api-key": settings.anthropic_api_key,
+        "x-api-key": api_key,
         "anthropic-version": "2023-06-01",
         "content-type": "application/json",
     }
 
     try:
-        async with httpx.AsyncClient(timeout=settings.request_timeout_seconds) as client:
+        async with httpx.AsyncClient(timeout=settings.request_timeout_seconds, trust_env=False) as client:
             response = await client.post("https://api.anthropic.com/v1/messages", json=payload, headers=headers)
     except httpx.RequestError:
         summary = _fallback_summary(paper)
-        await summary_cache.set(paper.id, summary.model_dump(mode="json"))
+        await summary_cache.set(cache_key, summary.model_dump(mode="json"))
         return summary
     if response.status_code >= 400:
-        raise HTTPException(status_code=502, detail="Claude API summarisation failed")
+        summary = _fallback_summary(paper)
+        await summary_cache.set(cache_key, summary.model_dump(mode="json"))
+        return summary
 
     text = response.json()["content"][0]["text"]
     try:
         parsed = json.loads(text)
         summary = SummaryResponse(paper_id=paper.id, **parsed)
-    except (KeyError, json.JSONDecodeError, ValueError) as exc:
-        raise HTTPException(status_code=502, detail="Claude returned invalid summary JSON") from exc
+    except (KeyError, json.JSONDecodeError, ValueError):
+        summary = _fallback_summary(paper)
 
-    await summary_cache.set(paper.id, summary.model_dump(mode="json"))
+    await summary_cache.set(cache_key, summary.model_dump(mode="json"))
     return summary
+
+
+def _provider_and_cache_key(settings, paper_id: str) -> tuple[str, str]:
+    gemini_key = (settings.gemini_api_key or "").strip()
+    if gemini_key and gemini_key.lower() not in PLACEHOLDER_KEYS:
+        return "gemini", f"gemini:{settings.gemini_model}:{paper_id}"
+    anthropic_key = (settings.anthropic_api_key or "").strip()
+    if anthropic_key and anthropic_key.lower() not in PLACEHOLDER_KEYS:
+        return "claude", f"claude:{settings.anthropic_model}:{paper_id}"
+    return "fallback", f"fallback:{paper_id}"
+
+
+async def _summarise_with_gemini(paper: PaperResult, settings) -> SummaryResponse:
+    payload = {
+        "systemInstruction": {"parts": [{"text": SYSTEM_PROMPT}]},
+        "contents": [
+            {
+                "role": "user",
+                "parts": [{"text": f"Title: {paper.title}\n\nAbstract or extracted paper text: {paper.abstract}"}],
+            }
+        ],
+        "generationConfig": {
+            "temperature": 0.2,
+            "responseMimeType": "application/json",
+        },
+    }
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{settings.gemini_model}:generateContent"
+    try:
+        async with httpx.AsyncClient(timeout=settings.request_timeout_seconds, trust_env=False) as client:
+            response = await client.post(url, params={"key": settings.gemini_api_key}, json=payload)
+    except httpx.RequestError:
+        return _fallback_summary(paper)
+    if response.status_code >= 400:
+        return _fallback_summary(paper)
+
+    try:
+        text = response.json()["candidates"][0]["content"]["parts"][0]["text"]
+        parsed = json.loads(text)
+        return SummaryResponse(paper_id=paper.id, **parsed)
+    except (KeyError, IndexError, json.JSONDecodeError, ValueError):
+        return _fallback_summary(paper)
