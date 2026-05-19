@@ -2,11 +2,26 @@
 
 Portfolio project for Python + AI roles. It searches arXiv, summarises papers with Claude, saves a reading list, and exports saved summaries as Markdown or `.docx`.
 
+## One-Click Local App
+On Windows, double-click:
+
+```text
+RUN_SUMMARISER.bat
+```
+
+The launcher will:
+- create `backend/.env` from `backend/.env.example` if needed
+- install missing Python backend dependencies
+- start the local FastAPI app
+- open `http://127.0.0.1:8000` in your browser
+
+Close the launcher window to stop the app.
+
 ## Tech Stack
 - Backend: FastAPI, async `httpx`, Pydantic, python-dotenv, python-docx
 - AI: Claude API with strict structured JSON output
 - Data source: arXiv REST API and XML parsing
-- Frontend: React + Vite, responsive async UX
+- Frontend: local FastAPI-served app for one-click use, plus React + Vite source for deployment
 - Storage: local JSON cache/library files for a simple deployable prototype
 
 ## Features
@@ -53,6 +68,8 @@ npm run dev
 ```
 
 Open `http://localhost:5173`.
+
+The one-click local version is served by FastAPI at `http://127.0.0.1:8000`, so it works even when Node/npm is not installed.
 
 ## API
 - `GET /search?q=keyword_or_arxiv_id`

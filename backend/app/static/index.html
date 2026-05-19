@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Research Paper Summariser</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="workbench">
+        <header class="hero">
+          <div>
+            <p class="eyebrow">Local Research Workspace</p>
+            <h1>AI Research Paper Summariser</h1>
+            <p class="subhead">Search arXiv, generate structured summaries, save the best papers, and export your reading list.</p>
+          </div>
+          <div class="status-pill" id="status-pill">Ready</div>
+        </header>
+
+        <form class="search-box" id="search-form">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m21 21-4.35-4.35m1.85-5.15a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/></svg>
+          <input id="query" value="retrieval augmented generation" placeholder="Search keyword or arXiv ID" />
+          <button type="submit">Search</button>
+        </form>
+
+        <div class="quick-searches">
+          <button data-query="RAG">RAG</button>
+          <button data-query="LLM evaluation">LLM evaluation</button>
+          <button data-query="agentic workflows">Agentic workflows</button>
+          <button data-query="transformers">Transformers</button>
+        </div>
+
+        <div class="notice hidden" id="notice"></div>
+        <section class="results" id="results"></section>
+      </section>
+
+      <aside class="reading-list">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Saved Papers</p>
+            <h2 id="saved-count">0 saved</h2>
+          </div>
+          <div class="panel-actions">
+            <button id="copy-markdown" title="Copy Markdown" aria-label="Copy Markdown">
+              <svg viewBox="0 0 24 24"><path d="M8 8h10v12H8z"/><path d="M6 16H4V4h12v2"/></svg>
+            </button>
+            <a href="/export/docx" title="Download DOCX" aria-label="Download DOCX">
+              <svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+            </a>
+          </div>
+        </div>
+        <div class="saved-list" id="saved-list"></div>
+      </aside>
+    </main>
+    <script src="/static/app.js"></script>
+  </body>
+</html>

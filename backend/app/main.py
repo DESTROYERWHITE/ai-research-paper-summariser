@@ -1,4 +1,8 @@
+from pathlib import Path
+
 from fastapi import FastAPI, HTTPException, Response
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
@@ -9,8 +13,10 @@ from app.services.exporter import library_to_docx, library_to_markdown
 from app.services.library import delete_entry, list_library, save_entry
 
 settings = get_settings()
+STATIC_DIR = Path(__file__).resolve().parent / "static"
 
 app = FastAPI(title=settings.app_name, version="1.0.0")
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[settings.frontend_origin, "http://localhost:3000"],
@@ -23,6 +29,11 @@ app.add_middleware(
 @app.get("/health")
 async def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/", include_in_schema=False)
+async def local_app() -> FileResponse:
+    return FileResponse(STATIC_DIR / "index.html")
 
 
 @app.get("/search", response_model=SearchResponse)
