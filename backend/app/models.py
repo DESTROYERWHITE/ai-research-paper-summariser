@@ -18,7 +18,7 @@ class SearchResponse(BaseModel):
     query: str
     count: int
     papers: list[PaperResult]
-    source: Literal["arxiv", "cache"]
+    source: Literal["arxiv", "cache", "upload"]
 
 
 class SummariseRequest(BaseModel):
@@ -52,3 +52,8 @@ class SaveLibraryRequest(BaseModel):
     paper: PaperResult
     summary: SummaryResponse
     tags: list[str] = Field(default_factory=list)
+
+
+class UploadSummaryResponse(BaseModel):
+    paper: PaperResult
+    summary: SummaryResponse

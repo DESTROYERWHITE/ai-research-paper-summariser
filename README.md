@@ -26,6 +26,7 @@ Close the launcher window to stop the app.
 
 ## Features
 - Search arXiv by keyword or paper ID.
+- Upload local `.pdf`, `.txt`, or `.md` papers for summarisation.
 - Parse title, authors, abstract, published date, categories, and URL.
 - Cache arXiv and summary responses locally to reduce repeat API calls.
 - Summarise each paper into:
@@ -74,6 +75,7 @@ The one-click local version is served by FastAPI at `http://127.0.0.1:8000`, so 
 ## API
 - `GET /search?q=keyword_or_arxiv_id`
 - `POST /summarise` with body `{ "paper_id": "1706.03762" }`
+- `POST /upload` with multipart form field `file`
 - `GET /library`
 - `POST /library`
 - `DELETE /library/{id}`
@@ -102,6 +104,7 @@ The repo includes 10 preloaded research paper references in `backend/tests/fixtu
 
 ## Extension Ideas
 - Summarise full PDFs with PyMuPDF instead of abstract-only summaries.
+- Add drag-and-drop upload batches for multiple papers at once.
 - Stream Claude output with Server-Sent Events.
 - Add BibTeX/RIS citation export.
 - Add user accounts and per-user reading lists.

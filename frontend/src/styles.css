@@ -128,6 +128,58 @@ h1 {
   padding: 0 12px;
 }
 
+.uploadBox {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #d7d1c4;
+  border-radius: 8px;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: 1fr auto;
+  margin: 0 0 24px;
+  max-width: 880px;
+  padding: 18px;
+}
+
+.uploadBox h2 {
+  font-size: 1.05rem;
+  margin-bottom: 6px;
+}
+
+.uploadBox p:last-child {
+  color: #5e6b63;
+  line-height: 1.45;
+  margin-bottom: 0;
+}
+
+.uploadButton {
+  align-items: center;
+  background: #174f43;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  font-weight: 800;
+  gap: 8px;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 18px;
+  white-space: nowrap;
+}
+
+.uploadButton input {
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  width: 1px;
+}
+
+.uploadButton.busy {
+  opacity: 0.75;
+  pointer-events: none;
+}
+
 .resultsGrid {
   display: grid;
   gap: 16px;
@@ -304,6 +356,10 @@ h1 {
 
   .workspace {
     padding: 22px;
+  }
+
+  .uploadBox {
+    grid-template-columns: 1fr;
   }
 
   .libraryPanel {

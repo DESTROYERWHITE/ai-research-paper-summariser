@@ -154,6 +154,52 @@ h1 {
   padding: 0 13px;
 }
 
+.upload-box {
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: 1fr auto;
+  margin: 0 0 24px;
+  max-width: 940px;
+  padding: 18px;
+}
+
+.upload-box h2 {
+  font-size: 1.05rem;
+  margin-bottom: 6px;
+}
+
+.upload-box p:last-child {
+  color: var(--muted);
+  line-height: 1.45;
+  margin-bottom: 0;
+}
+
+.upload-button {
+  align-items: center;
+  background: var(--accent-dark);
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  font-weight: 800;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 18px;
+  white-space: nowrap;
+}
+
+.upload-button input {
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  width: 1px;
+}
+
 .notice {
   background: var(--warning-bg);
   border: 1px solid #e6b19c;
@@ -363,6 +409,10 @@ h1 {
 
   .search-box {
     grid-template-columns: auto 1fr;
+  }
+
+  .upload-box {
+    grid-template-columns: 1fr;
   }
 
   .search-box button {

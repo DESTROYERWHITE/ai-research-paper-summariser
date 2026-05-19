@@ -26,12 +26,12 @@ def _fallback_summary(paper: PaperResult) -> SummaryResponse:
             "Use the Claude API key to generate a richer structured summary from the live model.",
         ],
         contributions=[
-            "Extracted metadata and abstract from arXiv.",
+            "Extracted metadata and paper text for structured analysis.",
             "Prepared the paper for LLM-based structured analysis.",
         ],
         limitations=[
-            "Fallback summary is based on the abstract only.",
-            "Full-paper PDF analysis could be added with PyMuPDF for deeper evidence.",
+            "Fallback summary uses the available extracted text rather than full model reasoning.",
+            "Live Claude output will provide stronger synthesis when an API key is configured.",
         ],
         follow_up_papers=[
             f"{paper.categories[0]} survey recent advances" if paper.categories else "recent related survey",
@@ -70,8 +70,13 @@ async def summarise_with_claude(paper: PaperResult) -> SummaryResponse:
         "content-type": "application/json",
     }
 
-    async with httpx.AsyncClient(timeout=settings.request_timeout_seconds) as client:
-        response = await client.post("https://api.anthropic.com/v1/messages", json=payload, headers=headers)
+    try:
+        async with httpx.AsyncClient(timeout=settings.request_timeout_seconds) as client:
+            response = await client.post("https://api.anthropic.com/v1/messages", json=payload, headers=headers)
+    except httpx.RequestError:
+        summary = _fallback_summary(paper)
+        await summary_cache.set(paper.id, summary.model_dump(mode="json"))
+        return summary
     if response.status_code >= 400:
         raise HTTPException(status_code=502, detail="Claude API summarisation failed")
 

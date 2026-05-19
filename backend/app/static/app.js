@@ -13,6 +13,7 @@ const elements = {
   savedCount: document.querySelector("#saved-count"),
   savedList: document.querySelector("#saved-list"),
   copyMarkdown: document.querySelector("#copy-markdown"),
+  upload: document.querySelector("#paper-upload"),
 };
 
 function setStatus(text) {
@@ -159,6 +160,35 @@ async function savePaper(paperId) {
   setStatus("Saved");
 }
 
+async function uploadPaper(file) {
+  showNotice("");
+  setStatus("Uploading");
+  renderSkeletons();
+  const formData = new FormData();
+  formData.append("file", file);
+  try {
+    const response = await fetch("/upload", {
+      method: "POST",
+      body: formData,
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ detail: "Upload failed" }));
+      throw new Error(error.detail || "Upload failed");
+    }
+    const data = await response.json();
+    state.papers = [data.paper, ...state.papers.filter((paper) => paper.id !== data.paper.id)];
+    state.summaries[data.paper.id] = data.summary;
+    renderPapers();
+    setStatus("Upload summarised");
+  } catch (error) {
+    elements.results.innerHTML = "";
+    showNotice(error.message);
+    setStatus("Check error");
+  } finally {
+    elements.upload.value = "";
+  }
+}
+
 async function loadLibrary() {
   state.library = await api("/library");
   renderLibrary();
@@ -207,6 +237,11 @@ elements.copyMarkdown.addEventListener("click", async () => {
   const response = await fetch("/export/markdown");
   await navigator.clipboard.writeText(await response.text());
   setStatus("Copied");
+});
+
+elements.upload.addEventListener("change", () => {
+  const file = elements.upload.files?.[0];
+  if (file) uploadPaper(file);
 });
 
 loadLibrary()

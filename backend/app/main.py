@@ -1,16 +1,17 @@
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Response
+from fastapi import FastAPI, File, HTTPException, Response, UploadFile
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
-from app.models import LibraryEntry, SaveLibraryRequest, SearchResponse, SummariseRequest, SummaryResponse
+from app.models import LibraryEntry, SaveLibraryRequest, SearchResponse, SummariseRequest, SummaryResponse, UploadSummaryResponse
 from app.services.arxiv import search_arxiv
 from app.services.claude import summarise_with_claude
 from app.services.exporter import library_to_docx, library_to_markdown
 from app.services.library import delete_entry, list_library, save_entry
+from app.services.uploads import summarise_upload
 
 settings = get_settings()
 STATIC_DIR = Path(__file__).resolve().parent / "static"
@@ -49,6 +50,11 @@ async def summarise(request: SummariseRequest) -> SummaryResponse:
     if not results.papers:
         raise HTTPException(status_code=404, detail="Paper not found")
     return await summarise_with_claude(results.papers[0])
+
+
+@app.post("/upload", response_model=UploadSummaryResponse)
+async def upload_paper(file: UploadFile = File(...)) -> UploadSummaryResponse:
+    return await summarise_upload(file)
 
 
 @app.get("/library", response_model=list[LibraryEntry])

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { Bookmark, Clipboard, Download, ExternalLink, Loader2, Search, Trash2 } from "lucide-react";
+import { Bookmark, Clipboard, Download, ExternalLink, FileUp, Loader2, Search, Trash2 } from "lucide-react";
 import { api } from "./api";
 import "./styles.css";
 
@@ -12,6 +12,7 @@ function App() {
   const [library, setLibrary] = useState([]);
   const [summaries, setSummaries] = useState({});
   const [loadingSearch, setLoadingSearch] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [activeSummary, setActiveSummary] = useState(null);
   const [error, setError] = useState("");
 
@@ -63,6 +64,20 @@ function App() {
     refreshLibrary();
   }
 
+  async function uploadPaper(file) {
+    setError("");
+    setUploading(true);
+    try {
+      const data = await api.upload(file);
+      setPapers((current) => [data.paper, ...current.filter((paper) => paper.id !== data.paper.id)]);
+      setSummaries((current) => ({ ...current, [data.paper.id]: data.summary }));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setUploading(false);
+    }
+  }
+
   async function copyMarkdown() {
     const response = await fetch(api.markdownUrl);
     const markdown = await response.text();
@@ -111,6 +126,27 @@ function App() {
             </button>
           ))}
         </div>
+
+        <section className="uploadBox">
+          <div>
+            <p className="eyebrow">Upload Your Paper</p>
+            <h2>Summarise a local PDF, TXT, or Markdown file</h2>
+            <p>Uploaded files become saveable results and can be exported with your reading list.</p>
+          </div>
+          <label className={uploading ? "uploadButton busy" : "uploadButton"}>
+            {uploading ? <Loader2 className="spin" size={18} /> : <FileUp size={18} />}
+            {uploading ? "Uploading" : "Choose file"}
+            <input
+              type="file"
+              accept=".pdf,.txt,.md,application/pdf,text/plain,text/markdown"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (file) uploadPaper(file);
+                event.target.value = "";
+              }}
+            />
+          </label>
+        </section>
 
         {error && <div className="error">{error}</div>}
 
